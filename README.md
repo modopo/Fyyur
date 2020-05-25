@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Fyyur
 -----
 
@@ -141,3 +142,6 @@ To start and run the local development server,
   ```
 
 4. Navigate to Home page [http://localhost:5000](http://localhost:5000)
+=======
+# Fyyur
+>>>>>>> 2ea0273912585f8b129c2c9c113b6cff18a36ee9
