@@ -23,7 +23,7 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 
 # TODO: connect to a local postgresql database
-
+migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -55,12 +55,13 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
-migrate = Migrate(app, db)
+
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+db.create_all()
 
 #----------------------------------------------------------------------------#
 # Filters.
-#----------------------------------------------------------------------------#
+#-----------------------------------------a---------------------------------#
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
