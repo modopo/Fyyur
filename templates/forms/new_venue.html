@@ -33,10 +33,30 @@
             autofocus = true) }}
         </div>
         <div class="form-group">
+            <label for="image_link">Image Link</label>
+            {{ form.image_link(class_ = 'form-control', placeholder='https://',
+            autofocus = true) }}
+        </div>
+        <div class="form-group">
             <label for="genres">Genres</label>
             <small>Ctrl+Click to select multiple</small>
             {{ form.genres(class_ = 'form-control', placeholder='Genres,
             separated by commas', id=form.genre, autofocus = true) }}
+        </div>
+        <div class="form-group">
+            <label for="seeking_talent">Looking for Talent</label>
+            {{ form.seeking_talent(class_ = 'form-control', autofocus =
+            true) }}
+        </div>
+        <div class="form-group">
+            <label for="talent_description">Talent Description</label>
+            {{ form.talent_description(class_ = 'form-control',
+            placeholder='Describe yourself', autofocus = true) }}
+        </div>
+        <div class="form-group">
+            <label for="website">Website</label>
+            {{ form.website(class_ = 'form-control', placeholder='https://',
+            autofocus = true) }}
         </div>
         <div class="form-group">
             <label for="facebook_link">Facebook Link</label>
