@@ -5,14 +5,15 @@
 import json
 import dateutil.parser
 import babel
+from babel import dates
 from flask import Flask, render_template, request, Response, flash, redirect, \
     url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import logging
-from logging import Formatter, FileHandler
 from flask_wtf import Form
+from logging import Formatter, FileHandler
 from forms import *
 
 # ----------------------------------------------------------------------------#
@@ -24,7 +25,6 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 
-# TODO: connect to a local postgresql database
 migrate = Migrate(app, db)
 
 
@@ -252,6 +252,14 @@ def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
+    new_Venue = Venue(
+        name = request.form['name'],
+        city = request.form['city'],
+        state = request.form['state'],
+        address = request.form['address'],
+        phone = request.form['phone'],
+
+    )
     # on successful db insert, flash success
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
     # TODO: on unsuccessful db insert, flash an error instead.
