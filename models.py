@@ -1,14 +1,18 @@
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 from flask_migrate import Migrate
+from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
-db = SQLAlchemy()
+#----------------------------------------------------------------------------#
+# App Config.
+#----------------------------------------------------------------------------#
 
-def db_setup(app):
-    app.config.from_object('config')
-    db.app = app
-    db.init_app(app)
-    migrate = Migrate(app, db)
-    return db
+app = Flask(__name__)
+moment = Moment(app)
+app.config.from_object('config')
+db = SQLAlchemy(app)
+migrate = Migrate(app,db)
 
 class Venue(db.Model):
     __tablename__ = 'Venue'
@@ -21,67 +25,14 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String()), nullable=True)
+    genres = db.Column("genres", db.ARRAY(db.String()), nullable=True)
     seeking_talent = db.Column(db.Boolean(), nullable=False)
     talent_description = db.Column(db.String(500), nullable=True)
     website = db.Column(db.String(500), nullable=True)
     shows = db.relationship('Show', backref='Venue', lazy='dynamic')
 
-    def __init__(self, name, city, state, address, phone, image_link,
-                 facebook_link, genres, website, seeking_talent = False,
-                 talent_description = ""):
-        self.name = name
-        self.city = city
-        self.state = state
-        self.address = address
-        self.phone = phone
-        self.image_link = image_link
-        self.facebook_link = facebook_link
-        self.genres = genres
-        self.website = website
-        self.seeking_talent = seeking_talent
-        self.talent_description = talent_description
-
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def shortDescription(self):
-        return {
-            'id' : self.id,
-            'name' : self.name
-        }
-
-    def longDescription(self):
-        return {
-            'id' : self.id,
-            'name' : self.name,
-            'city' : self.city,
-            'state' : self.state
-        }
-
-    def detailed(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'genres': self.genres,
-            'address': self.address,
-            'city': self.city,
-            'phone': self.phone,
-            'website': self.website,
-            'facebook_link': self.facebook_link,
-            'seeking_talent': self.seeking_talent,
-            'talent_description': self.talent_description,
-            'image_link': self.image_link
-        }
-
+    def __repr__(self):
+        return '<Venue {}>'.format(self.name)
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -99,52 +50,8 @@ class Artist(db.Model):
     website = db.Column(db.String(120), nullable=True)
     shows = db.relationship('Show', backref='Artist', lazy=True)
 
-    def __init__(self, name, city, state, website, phone, genres, image_link,
-                 facebook_link, seeking_venue = False, seeking_description
-                 =""):
-        self.name = name
-        self.city = city
-        self.state = state
-        self.phone = phone
-        self.genres = genres
-        self.image_link = image_link
-        self.facebook_link = facebook_link
-        self.seeking_venue = seeking_venue
-        self.seeking_description = seeking_description
-        self.website = website
-
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def shortDescription(self):
-        return {
-            'id' : self.id,
-            'name' : self.name
-        }
-
-    def detailed(self):
-        return {
-            'id' : self.id,
-            'name' : self.name,
-            'genres' : self.genres,
-            'city' : self.city,
-            'state' : self.state,
-            'phone' : self.phone,
-            'website' : self.website,
-            'facebook_link': self.facebook_link,
-            'seeking_talent': self.seeking_talent,
-            'seeking_description': self.seeking_description,
-            'image_link': self.image_link
-        }
-
+    def __repr__(self):
+        return '<Artist {}>'.format(self.name)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Show(db.Model):
@@ -156,37 +63,5 @@ class Show(db.Model):
                           nullable=False)
     start_time = db.Column(db.String(), nullable=False)
 
-    def __init__(self, venue_id, artist_id, start_time):
-        self.venue_id = venue_id
-        self.artist_id = artist_id
-        self.start_time = start_time
-
-    def insert(self):
-        db.session.add(self)
-        db.sesions.commit()
-
-    def detailed(self):
-        return {
-            'venue_id' : self.venue_id,
-            'venue_name' : self.Venue.name,
-            'artist_id' : self.artist_id,
-            'artist_name' : self.Artist.name,
-            'artist_image_link' : self.Artist.image_link,
-            'start_time' : self.start_time
-        }
-
-    def artist_detail(self):
-        return {
-            'artist_id' : self.venue_id,
-            'artist_name' : self.Artist.name,
-            'artist_image_link' : self.Artist.image_link,
-            'start_time' : self.start_time
-        }
-
-    def venue_details(self):
-        return {
-            'venue_id' : self.venue_id,
-            'venue_name' : self.Venue.name,
-            'venue_image_link' : self.Venue.image_link,
-            'start_time' : self.start_time
-        }
+    def __repr__(self):
+        return '<Show {}{}>'.format(self.artist_id, self.venue_id)
