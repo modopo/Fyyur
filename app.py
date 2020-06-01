@@ -183,6 +183,11 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
     try:
+        if request.form['seeking_talent'] == 'y':
+            seeking_talent = True
+        else:
+            seeking_talent = False
+
         venue = Venue(
             name=request.form['name'],
             genres=request.form.getlist('genres'),
@@ -193,16 +198,18 @@ def create_venue_submission():
             website=request.form['website'],
             facebook_link=request.form['facebook_link'],
             image_link=request.form['image_link'],
-            seeking_talent=request.form['seeking_talent'],
+            seeking_talent=seeking_talent,
             talent_description=request.form['talent_description']
         )
 
         db.session.add(venue)
         db.session.commit()
+
         # on successful db insert, flash success
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    except:
+    except SQLAlchemyError as e:
         db.session.rollback()
+        print(e)
         flash('An error occurred. Venue ' + request.form['name'] + ' could not \
             be listed.')
     finally:

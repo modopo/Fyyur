@@ -45,7 +45,7 @@ class Artist(db.Model):
     genres = db.Column(db.ARRAY(db.String()), nullable=True)
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
-    seeking_venue = db.Column(db.Boolean(), nullable=True)
+    seeking_venue = db.Column(db.Boolean(), nullable=False)
     seeking_description = db.Column(db.String(120), nullable=True)
     website = db.Column(db.String(120), nullable=True)
     shows = db.relationship('Show', backref='Artist', lazy=True)
