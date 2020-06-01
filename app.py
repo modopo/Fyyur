@@ -7,7 +7,7 @@ import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from sqlalchemy.exc import SQLAlchemyError
 from forms import *
 from models import *
@@ -184,17 +184,17 @@ def create_venue_form():
 def create_venue_submission():
     try:
         venue = Venue(
-            name = request.form.data,
-            city = request.form.data,
-            state = request.form.data,
-            address = request.form.data,
-            phone = request.form.data,
-            image_link = request.form.data,
-            facebook_link = request.form.data,
-            genres = request.form.data,
-            seeking_talent = request.form.data,
-            talent_description= request.form.data,
-            website = request.form.data,
+            name=request.form['name'],
+            genres=request.form.getlist('genres'),
+            address=request.form['address'],
+            city=request.form['city'],
+            state=request.form['state'],
+            phone=request.form['phone'],
+            website=request.form['website'],
+            facebook_link=request.form['facebook_link'],
+            image_link=request.form['image_link'],
+            seeking_talent=request.form['seeking_talent'],
+            talent_description=request.form['talent_description']
         )
 
         db.session.add(venue)
