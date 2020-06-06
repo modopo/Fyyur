@@ -189,24 +189,20 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    form = VenueForm()
     try:
-        if request.form['seeking_talent'] == 'y':
-            seeking_talent = True
-        else:
-            seeking_talent = False
-
         venue = Venue(
-            name=request.form['name'],
-            genres=request.form.getlist('genres'),
-            address=request.form['address'],
-            city=request.form['city'],
-            state=request.form['state'],
-            phone=request.form['phone'],
-            website=request.form['website'],
-            facebook_link=request.form['facebook_link'],
-            image_link=request.form['image_link'],
-            seeking_talent=seeking_talent,
-            talent_description=request.form['talent_description']
+            name = form.name.data,
+            genres = form.genres.data,
+            address = form.address.data,
+            city = form.city.data,
+            state = form.state.data,
+            phone = form.phone.data,
+            website = form.website.data,
+            facebook_link = form.facebook_link.data,
+            image_link = form.image_link.data,
+            seeking_talent = form.seeking_talent.data,
+            talent_description = form.talent_description.data
         )
 
         db.session.add(venue)
@@ -417,23 +413,19 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    form = ArtistForm()
     try:
-        if request.form['seeking_venue'] == 'y':
-            seeking_venue = True
-        else:
-            seeking_venue = False
-
         artist = Artist(
-            name=request.form['name'],
-            genres=request.form.getlist('genres'),
-            city=request.form['city'],
-            state=request.form['state'],
-            phone=request.form['phone'],
-            website=request.form['website'],
-            facebook_link=request.form['facebook_link'],
-            image_link=request.form['image_link'],
-            seeking_venue= seeking_venue,
-            venue_description=request.form['venue_description']
+            name = form.name.data,
+            genres = form.genres.data,
+            city = form.city.data,
+            state = form.state.data,
+            phone= form.phone.data,
+            website = form.website.data,
+            facebook_link = form.facebook_link.data,
+            image_link = form.image_link.data,
+            seeking_venue = form.seeking_venue.data,
+            venue_description = form.venue_description.data
         )
 
         db.session.add(artist)
