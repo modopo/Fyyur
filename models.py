@@ -23,12 +23,12 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
+    website = db.Column(db.String(500), nullable=True)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     genres = db.Column("genres", db.ARRAY(db.String()), nullable=True)
     seeking_talent = db.Column(db.Boolean(), nullable=False)
     talent_description = db.Column(db.String(500), nullable=True)
-    website = db.Column(db.String(500), nullable=True)
     shows = db.relationship('Show', backref='Venue', lazy='dynamic')
 
     def __repr__(self):
@@ -39,15 +39,15 @@ class Artist(db.Model):
 
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(), nullable=False)
-    city = db.Column(db.String(120), nullable=True)
-    state = db.Column(db.String(120), nullable=True)
-    phone = db.Column(db.String(120), nullable=True)
-    genres = db.Column(db.ARRAY(db.String()), nullable=True)
+    city = db.Column(db.String(120), nullable=False)
+    state = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(120), nullable=False)
+    genres = db.Column("genres", db.ARRAY(db.String()), nullable=False)
+    website = db.Column(db.String(120), nullable=True)
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
     seeking_venue = db.Column(db.Boolean(), nullable=False)
     seeking_description = db.Column(db.String(120), nullable=True)
-    website = db.Column(db.String(120), nullable=True)
     shows = db.relationship('Show', backref='Artist', lazy=True)
 
     def __repr__(self):

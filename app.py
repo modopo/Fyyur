@@ -44,7 +44,7 @@ def index():
 def venues():
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
+    not_data = [{
         "city": "San Francisco",
         "state": "CA",
         "venues": [{
@@ -65,7 +65,14 @@ def venues():
             "num_upcoming_shows": 0,
         }]
     }]
-    return render_template('pages/venues.html', areas=data);
+
+    data = []
+    locations = db.session.query(Venue.city, Venue.state).distinct()
+    for venue in locations:
+        return
+    current_date = datetime.now()
+
+    return render_template('pages/venues.html', areas=not_data)
 
 
 @app.route('/venues/search', methods=['POST'])
@@ -205,7 +212,6 @@ def create_venue_submission():
         db.session.add(venue)
         db.session.commit()
 
-        # on successful db insert, flash success
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -411,14 +417,32 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-    # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    try:
+        if request.form['seeking_talent'] == 'y':
+            seeking_talent = True
+        else:
+            seeking_talent = False
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+        venue = Venue(
+            name=request.form['name'],
+            genres=request.form.getlist('genres'),
+            address=request.form['address'],
+            city=request.form['city'],
+            state=request.form['state'],
+            phone=request.form['phone'],
+            website=request.form['website'],
+            facebook_link=request.form['facebook_link'],
+            image_link=request.form['image_link'],
+            seeking_venue= seeking_venue,
+            venue_description=request.form['talent_description']
+        )
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash('An error occurred. Venue ' + request.form['name'] + ' could not \
+            be listed.')
+    finally:
+        db.session.close()
+
     return render_template('pages/home.html')
 
 

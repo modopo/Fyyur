@@ -148,11 +148,21 @@ class ArtistForm(Form):
         'image_link'
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
         'genres', validators=[DataRequired()],
         choices=genres_choices
     )
+    seeking_venue = BooleanField(
+        'seeking_venue'
+    )
+    venue_description = StringField(
+        'venue_description', validators=[Length(max=500)]
+    )
     facebook_link = StringField(
-        # TODO implement enum restriction
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    image_link = StringField(
+        'image_link', validators=[URL()]
     )
