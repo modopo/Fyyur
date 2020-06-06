@@ -418,15 +418,14 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     try:
-        if request.form['seeking_talent'] == 'y':
-            seeking_talent = True
+        if request.form['seeking_venue'] == 'y':
+            seeking_venue = True
         else:
-            seeking_talent = False
+            seeking_venue = False
 
-        venue = Venue(
+        artist = Artist(
             name=request.form['name'],
             genres=request.form.getlist('genres'),
-            address=request.form['address'],
             city=request.form['city'],
             state=request.form['state'],
             phone=request.form['phone'],
@@ -434,12 +433,18 @@ def create_artist_submission():
             facebook_link=request.form['facebook_link'],
             image_link=request.form['image_link'],
             seeking_venue= seeking_venue,
-            venue_description=request.form['talent_description']
+            venue_description=request.form['venue_description']
         )
+
+        db.session.add(artist)
+        db.session.commit()
+
+        flash('Artist ' + request.form['name'] + ' was successfully listed!')
     except SQLAlchemyError as e:
+        print(e)
         db.session.rollback()
-        flash('An error occurred. Venue ' + request.form['name'] + ' could not \
-            be listed.')
+        flash('An error occurred. Artist ' + request.form['name'] + 'could \
+            not be listed')
     finally:
         db.session.close()
 

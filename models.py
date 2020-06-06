@@ -47,7 +47,7 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
     seeking_venue = db.Column(db.Boolean(), nullable=False)
-    seeking_description = db.Column(db.String(120), nullable=True)
+    venue_description = db.Column(db.String(120), nullable=True)
     shows = db.relationship('Show', backref='Artist', lazy=True)
 
     def __repr__(self):
