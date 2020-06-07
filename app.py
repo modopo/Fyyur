@@ -12,6 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from forms import *
 from models import *
 
+
 # ----------------------------------------------------------------------------#
 # Filters.
 # -----------------------------------------a---------------------------------#
@@ -69,10 +70,19 @@ def venues():
     data = []
     locations = db.session.query(Venue.city, Venue.state).distinct()
     for venue in locations:
-        return
-    current_date = datetime.now()
+        venue = dict(zip(('city', 'state'), venue))
+        venue['venue'] = []
+        for venue_list in Venue.query.filter_by(city=venue['city'], state=venue['state']).all():
+            shows = Show.query.filter_by(venue_id=venue_list.id).all()
+            venue_list = {
+                'id': venue_list.id,
+                'name': venue_list.name,
+                'num_upcoming_shows': len(upcoming_shows(shows))
+            }
+            venue['venue'].append(venue_list)
+        data.append(venue)
 
-    return render_template('pages/venues.html', areas=not_data)
+    return render_template('pages/venues.html', areas=data)
 
 
 @app.route('/venues/search', methods=['POST'])
@@ -192,17 +202,17 @@ def create_venue_submission():
     form = VenueForm()
     try:
         venue = Venue(
-            name = form.name.data,
-            genres = form.genres.data,
-            address = form.address.data,
-            city = form.city.data,
-            state = form.state.data,
-            phone = form.phone.data,
-            website = form.website.data,
-            facebook_link = form.facebook_link.data,
-            image_link = form.image_link.data,
-            seeking_talent = form.seeking_talent.data,
-            talent_description = form.talent_description.data
+            name=form.name.data,
+            genres=form.genres.data,
+            address=form.address.data,
+            city=form.city.data,
+            state=form.state.data,
+            phone=form.phone.data,
+            website=form.website.data,
+            facebook_link=form.facebook_link.data,
+            image_link=form.image_link.data,
+            seeking_talent=form.seeking_talent.data,
+            talent_description=form.talent_description.data
         )
 
         db.session.add(venue)
@@ -416,16 +426,16 @@ def create_artist_submission():
     form = ArtistForm()
     try:
         artist = Artist(
-            name = form.name.data,
-            genres = form.genres.data,
-            city = form.city.data,
-            state = form.state.data,
-            phone= form.phone.data,
-            website = form.website.data,
-            facebook_link = form.facebook_link.data,
-            image_link = form.image_link.data,
-            seeking_venue = form.seeking_venue.data,
-            venue_description = form.venue_description.data
+            name=form.name.data,
+            genres=form.genres.data,
+            city=form.city.data,
+            state=form.state.data,
+            phone=form.phone.data,
+            website=form.website.data,
+            facebook_link=form.facebook_link.data,
+            image_link=form.image_link.data,
+            seeking_venue=form.seeking_venue.data,
+            venue_description=form.venue_description.data
         )
 
         db.session.add(artist)
@@ -489,6 +499,32 @@ def shows():
     }]
     return render_template('pages/shows.html', shows=data)
 
+
+def upcoming_shows(shows):
+    upcoming = []
+
+    for show in shows:
+        if show.start_time > datetime.now():
+            upcoming.append({
+                "artist_id": show.artist_id,
+                "artist_name": Artist.query.filter_by(id= show.artist_id).first().name,
+                "artist_image_link": Artist.query.filter_by(id= show.artist_id).first().image_link,
+                "start_time": format_datetime(str(show.start_time))
+            })
+    return upcoming
+
+def past_shows(shows):
+    past = []
+
+    for show in shows:
+        if show.start_time < datetime.now():
+            past.append({
+                "artist_id": show.artist_id,
+                "artist_name": Artist.query.filter_by(id= show.artist_id).first().name,
+                "artist_image_link": Artist.query.filter_by(id= show.artist_id).first().image_link,
+                "start_time": format_datetime(str(show.start_time))
+            })
+    return past
 
 @app.route('/shows/create')
 def create_shows():
