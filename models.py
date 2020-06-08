@@ -2,7 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -26,7 +26,7 @@ class Venue(db.Model):
     website = db.Column(db.String(500), nullable=True)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    genres = db.Column("genres", db.ARRAY(db.String()), nullable=True)
+    genres = db.Column(db.ARRAY(db.String(120)), nullable=True)
     seeking_talent = db.Column(db.Boolean(), nullable=False)
     talent_description = db.Column(db.String(500), nullable=True)
     shows = db.relationship('Show', backref='Venue', lazy='dynamic')
@@ -42,7 +42,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120), nullable=False)
     state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120), nullable=False)
-    genres = db.Column("genres", db.ARRAY(db.String()), nullable=False)
+    genres = db.Column(db.ARRAY(db.String(120)), nullable=True)
     website = db.Column(db.String(120), nullable=True)
     image_link = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120), nullable=True)
@@ -61,7 +61,7 @@ class Show(db.Model):
     venue_id = db.Column(db.Integer(), db.ForeignKey(Venue.id), nullable=False)
     artist_id = db.Column(db.Integer(), db.ForeignKey(Artist.id),
                           nullable=False)
-    start_time = db.Column(db.String(), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return '<Show {}{}>'.format(self.artist_id, self.venue_id)
