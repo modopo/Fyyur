@@ -23,8 +23,7 @@ def format_datetime(value, format='medium'):
         format = "EEEE MMMM, d, y 'at' h:mma"
     elif format == 'medium':
         format = "EE MM, dd, y h:mma"
-    return babel.dates.format_datetime(date, format)
-
+    return babel.dates.format_datetime(date, format, locale='en')
 
 app.jinja_env.filters['datetime'] = format_datetime
 
@@ -44,18 +43,18 @@ def index():
 @app.route('/venues')
 def venues():
     data = []
-    locations = db.session.query(Venue.city, Venue.state).distinct()
-    for venue in locations:
+    areas = db.session.query(Venue.city, Venue.state).distinct()
+    for venue in areas:
         venue = dict(zip(('city', 'state'), venue))
-        venue['venue'] = []
-        for venue_list in Venue.query.filter_by(city=venue['city'], state=venue['state']).all():
-            shows = Show.query.filter_by(venue_id=venue_list.id).all()
-            venue_list = {
-                'id': venue_list.id,
-                'name': venue_list.name,
+        venue['venues'] = []
+        for venue_data in Venue.query.filter_by(city=venue['city'], state=venue['state']).all():
+            shows = Show.query.filter_by(venue_id=venue_data.id).all()
+            venue_data = {
+                'id': venue_data.id,
+                'name': venue_data.name,
                 'num_upcoming_shows': len(upcoming_shows(shows))
             }
-            venue['venue'].append(venue_list)
+            venue['venues'].append(venue_data)
         data.append(venue)
 
     return render_template('pages/venues.html', areas=data)
@@ -63,17 +62,20 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     response = {
-        "count": 1,
-        "data": [{
-            "id": 2,
-            "name": "The Dueling Pianos Bar",
-            "num_upcoming_shows": 0,
-        }]
+        "data": []
     }
+    venues = db.session.query(Venue.name, Venue.id).all()
+    for venue in venues:
+        name = venue[0]
+        id = venue[1]
+        search_term = request.form.get('search_term', '')
+        if name.find(search_term) != 1:
+            shows = Show.query.filter_by(venue_id=id).all()
+            venue = dict(zip(('name', 'id'), venue))
+            venue['num_upcoming_shows'] = len(upcoming_shows(shows))
+            response['data'].append(venue)
+    response['count'] = len(response['data'])
     return render_template('pages/search_venues.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -81,7 +83,7 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     venue = Venue.query.filter_by(id=venue_id).first()
-    shows = Show.query.filter_by(venue=venue_id).all()
+    shows = Show.query.filter_by(venue_id=venue_id).all()
 
     data = {
         "id": venue.id,
@@ -136,7 +138,6 @@ def create_venue_submission():
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
     except SQLAlchemyError as e:
         db.session.rollback()
-        print(e)
         flash('An error occurred. Venue ' + request.form['name'] + ' could not \
             be listed.')
     finally:
@@ -146,12 +147,17 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    try:
+        venue = Venue.query.get(venue_id)
+        db.session.delete(venue)
+        db.session.commit()
+        return render_template('pages/home.html')
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash('An error occurred. Venue could not be removed.')
+        return render_template('pages/home.html')
+    finally:
+        db.session.close()
 
 
 #  Artists
@@ -168,17 +174,20 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
     response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+        "data": []
     }
+    artists = db.session.query(Artist.name, Artist.id).all()
+    for artist in artists:
+        name = artist[0]
+        id = artist[1]
+        search_term = request.form.get('search_term','')
+        if name.find(search_term) != -1:
+            shows = Show.query.filter_by(artist_id=id).all()
+            artist = dict(zip(('name', 'id'), artist))
+            artist['num_upcoming_shows'] = len(upcoming_shows(shows))
+            response['data'].append(artist)
+    response['count'] = len(response['data'])
     return render_template('pages/search_artists.html', results=response,
                            search_term=request.form.get('search_term', ''))
 
@@ -187,7 +196,7 @@ def search_artists():
 def show_artist(artist_id):
     artist = Artist.query.filter_by(id=artist_id).first()
     shows = Show.query.filter_by(artist_id=artist_id).all()
-    print(artist.genres)
+
     data = {
         "id": artist.id,
         "name": artist.name,
@@ -331,8 +340,10 @@ def shows():
             "venue_id": show.venue_id,
             "venue_name": db.session.query(Venue.name).filter_by(id=show.venue_id).first()[0],
             "artist_id": show.artist_id,
-            "artist_image_link": db.session.query(Artist.name).filter_by(
-                id=show.artist_id).first()[0],
+            "artist_name": db.session.query(Artist.name).filter_by(id=show.artist_id).first()[0],
+            "artist_image_link": db.session.query(Artist.image_link).filter_by(id=show.artist_id).first(
+
+            )[0],
             "start_time": str(show.start_time)
         }
         data.append(show)
@@ -349,7 +360,9 @@ def upcoming_shows(shows):
                 "artist_id": show.artist_id,
                 "artist_name": Artist.query.filter_by(id=show.artist_id).first().name,
                 "artist_image_link": Artist.query.filter_by(id=show.artist_id).first().image_link,
-                "start_time": format_datetime(str(show.start_time))
+                "start_time": format_datetime(str(show.start_time)),
+                "venue_name": Venue.query.filter_by(id=show.venue_id).first().name,
+                "venue_image_link": Venue.query.filter_by(id=show.venue_id).first().image_link
             })
     return upcoming
 
@@ -363,7 +376,9 @@ def past_shows(shows):
                 "artist_id": show.artist_id,
                 "artist_name": Artist.query.filter_by(id=show.artist_id).first().name,
                 "artist_image_link": Artist.query.filter_by(id=show.artist_id).first().image_link,
-                "start_time": format_datetime(str(show.start_time))
+                "start_time": format_datetime(str(show.start_time)),
+                "venue_name": Venue.query.filter_by(id=show.venue_id).first().name,
+                "venue_image_link": Venue.query.filter_by(id=show.venue_id).first().image_link
             })
     return past
 
