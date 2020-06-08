@@ -3,16 +3,16 @@ from flask_migrate import Migrate
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 
-
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 # App Config.
-#----------------------------------------------------------------------------#
+# ----------------------------------------------------------------------------#
 
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
-migrate = Migrate(app,db)
+migrate = Migrate(app, db)
+
 
 class Venue(db.Model):
     __tablename__ = 'Venue'
@@ -34,6 +34,7 @@ class Venue(db.Model):
     def __repr__(self):
         return '<Venue {}>'.format(self.name)
 
+
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
@@ -52,6 +53,7 @@ class Artist(db.Model):
 
     def __repr__(self):
         return '<Artist {}>'.format(self.name)
+
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Show(db.Model):
