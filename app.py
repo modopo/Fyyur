@@ -25,6 +25,7 @@ def format_datetime(value, format='medium'):
         format = "EE MM, dd, y h:mma"
     return babel.dates.format_datetime(date, format, locale='en')
 
+
 app.jinja_env.filters['datetime'] = format_datetime
 
 
@@ -181,7 +182,7 @@ def search_artists():
     for artist in artists:
         name = artist[0]
         id = artist[1]
-        search_term = request.form.get('search_term','')
+        search_term = request.form.get('search_term', '')
         if name.find(search_term) != -1:
             shows = Show.query.filter_by(artist_id=id).all()
             artist = dict(zip(('name', 'id'), artist))
@@ -341,9 +342,10 @@ def shows():
             "venue_name": db.session.query(Venue.name).filter_by(id=show.venue_id).first()[0],
             "artist_id": show.artist_id,
             "artist_name": db.session.query(Artist.name).filter_by(id=show.artist_id).first()[0],
-            "artist_image_link": db.session.query(Artist.image_link).filter_by(id=show.artist_id).first(
+            "artist_image_link":
+                db.session.query(Artist.image_link).filter_by(id=show.artist_id).first(
 
-            )[0],
+                )[0],
             "start_time": str(show.start_time)
         }
         data.append(show)
