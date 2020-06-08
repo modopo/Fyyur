@@ -319,7 +319,6 @@ def create_artist_submission():
 
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
     except SQLAlchemyError as e:
-        print(e)
         db.session.rollback()
         flash('An error occurred. Artist ' + request.form['name'] + 'could \
             not be listed')
@@ -343,9 +342,7 @@ def shows():
             "artist_id": show.artist_id,
             "artist_name": db.session.query(Artist.name).filter_by(id=show.artist_id).first()[0],
             "artist_image_link":
-                db.session.query(Artist.image_link).filter_by(id=show.artist_id).first(
-
-                )[0],
+                db.session.query(Artist.image_link).filter_by(id=show.artist_id).first()[0],
             "start_time": str(show.start_time)
         }
         data.append(show)
